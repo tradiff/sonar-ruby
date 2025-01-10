@@ -555,12 +555,28 @@ public class RubyVisitor {
     return new ParameterTreeImpl(metaData(node), identifierTree, null, defaultValue);
   }
 
-  private Tree createCaseTree(AstNode node, List<?> children) {
-    Tree expression = ((Tree) children.get(0));
-    Tree body = ((Tree) children.get(1));
+  private Tree createCaseTree(final AstNode node, final List<?> children) {
+    int size = children.size();
+    Tree expression;
+    Tree body;
+
+    if (size == 0) {
+      expression = null;
+      body = null;
+    } else if (size == 1) {
+      expression = (Tree) children.get(0);
+      body = null;
+    } else {
+      int bodyIndex = size - 1;
+      var expressionItems = children.subList(0, bodyIndex);
+      expression = createNativeTree(node, expressionItems);
+      body = (Tree) children.get(bodyIndex);
+    }
+
     if (body == null) {
       body = new BlockTreeImpl(metaData(node), Collections.emptyList());
     }
+
     return new MatchCaseTreeImpl(metaData(node), expression, body);
   }
 
